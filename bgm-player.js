@@ -9,7 +9,7 @@
     const PRIMARY_COLOR = "#469382"; // あなたの象徴色
 
     const songs = [
-        { name: '01. Track One', filename: 'track1.mp3' },
+        { name: '01. フィヨルドの澄んだ風(甘茶の音楽工房様)', filename: 'フィヨルドの澄んだ風(甘茶の音楽工房様).mp3' },
         { name: '02. Track Two', filename: 'track2.mp3' },
         { name: '03. Track Three', filename: 'track3.mp3' },
         // 新しい曲を追加する場合は、ここに { name: '...', filename: '...' } を増やすだけ
