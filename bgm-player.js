@@ -1,121 +1,135 @@
 /**
- * BGM Selector Component
- * 使い方: 読み込みたいHTMLの </body> 直前に <script src="bgm-player.js"></script> を追加
+ * BGM Selector Component (v2.0)
+ * Repository: https://github.com/CheeseBroth-web/Modules
+ * Color Theme: #469382
  */
 (function() {
-    // --- 1. CSSの注入 ---
+    // --- 1. 基本設定（ここを編集して曲を管理） ---
+    const REPO_URL = "https://raw.githubusercontent.com/CheeseBroth-web/Modules/main";
+    const PRIMARY_COLOR = "#469382"; // あなたの象徴色
+
+    const songs = [
+        { name: '01. Track One', filename: 'track1.mp3' },
+        { name: '02. Track Two', filename: 'track2.mp3' },
+        { name: '03. Track Three', filename: 'track3.mp3' },
+        // 新しい曲を追加する場合は、ここに { name: '...', filename: '...' } を増やすだけ
+    ];
+
+    // --- 2. CSSの注入（名前の衝突を防ぐため接頭辞 bgmp- を使用） ---
     const style = document.createElement('style');
     style.textContent = `
-        #bgm-trigger {
+        #bgmp-trigger {
             position: fixed; bottom: 15px; right: 15px;
-            width: 40px; height: 40px;
-            background-color: #469382; color: white;
+            width: 42px; height: 42px;
+            background-color: ${PRIMARY_COLOR}; color: white;
             border-radius: 50%; border: none; cursor: pointer;
-            font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 9999; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
+            font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        #bgm-trigger:hover { transform: scale(1.1); background-color: #3d8172; }
+        #bgmp-trigger:hover { transform: scale(1.1); filter: brightness(1.1); }
         
-        #bgm-panel {
-            position: fixed; bottom: 65px; right: 15px;
-            width: 220px; max-height: 300px;
-            background: #ffffff; border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        #bgmp-panel {
+            position: fixed; bottom: 70px; right: 15px;
+            width: 220px; max-height: 320px;
+            background: #ffffff; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             display: none; flex-direction: column;
-            z-index: 9998; overflow: hidden;
-            font-family: sans-serif; border: 1px solid #eee;
+            z-index: 99998; overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        .bgm-header {
-            padding: 10px 12px; background: #fdfdfd;
+        .bgmp-header {
+            padding: 12px; background: #fafafa;
             border-bottom: 1px solid #eee; font-size: 13px;
-            font-weight: bold; color: #469382;
+            font-weight: bold; color: ${PRIMARY_COLOR};
         }
-        .bgm-list {
-            overflow-y: auto; flex-grow: 1; padding: 8px;
+        .bgmp-list {
+            overflow-y: auto; flex-grow: 1; padding: 10px;
+            background: #fff;
         }
-        .bgm-list::-webkit-scrollbar { width: 4px; }
-        .bgm-list::-webkit-scrollbar-thumb { background-color: #ddd; border-radius: 4px; }
+        .bgmp-list::-webkit-scrollbar { width: 4px; }
+        .bgmp-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
         
-        .bgm-option {
-            display: block; width: 100%; padding: 8px 10px; margin-bottom: 4px;
-            text-align: left; border: 1px solid transparent; border-radius: 5px;
-            background: #fcfcfc; cursor: pointer; font-size: 12px;
+        .bgmp-option {
+            display: block; width: 100%; padding: 10px; margin-bottom: 5px;
+            text-align: left; border: 1px solid transparent; border-radius: 6px;
+            background: #f8f8f8; cursor: pointer; font-size: 12px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            transition: 0.2s; color: #333;
+            transition: 0.2s; color: #444;
         }
-        .bgm-option:hover { background: #f0f7f5; }
-        .bgm-option.playing { background: #469382; color: white; }
+        .bgmp-option:hover { background: #f0f7f5; border-color: ${PRIMARY_COLOR}44; }
+        .bgmp-option.playing { background: ${PRIMARY_COLOR}; color: white; font-weight: bold; }
         
-        .bgm-footer { padding: 8px; background: #fdfdfd; border-top: 1px solid #eee; }
-        #bgm-stop-btn {
-            width: 100%; padding: 6px; font-size: 11px;
-            border: 1px solid #ccc; border-radius: 4px;
-            background: white; color: #666; cursor: pointer;
+        .bgmp-footer { padding: 8px; background: #fafafa; border-top: 1px solid #eee; }
+        #bgmp-stop-btn {
+            width: 100%; padding: 7px; font-size: 11px;
+            border: 1px solid #ddd; border-radius: 4px;
+            background: white; color: #777; cursor: pointer;
+            transition: 0.2s;
         }
+        #bgmp-stop-btn:hover { background: #f0f0f0; color: #333; }
     `;
     document.head.appendChild(style);
 
-    // --- 2. HTMLの生成 ---
+    // --- 3. HTML構造の生成 ---
     const container = document.createElement('div');
-    container.id = 'bgm-player-container';
+    container.id = 'bgmp-app-root';
     
-    // 曲リストの定義（ここを書き換えるだけで曲を増やせます）
-    const songs = [
-        { name: '01. Early Morning', url: 'url1.mp3' },
-        { name: '02. Modern Pop Fusion', url: 'url2.mp3' },
-        { name: '03. Urban Chill', url: 'url3.mp3' },
-        { name: '04. Rain & Piano', url: 'url4.mp3' },
-        { name: '05. Lo-fi Beats', url: 'url5.mp3' },
-        { name: '06. Midnight Groove', url: 'url6.mp3' },
-        { name: '07. Acoustic Session', url: 'url7.mp3' },
-        { name: '08. Electric Night', url: 'url8.mp3' },
-        { name: '09. Calm Sunset', url: 'url9.mp3' },
-        { name: '10. Deep Sea Ambient', url: 'url10.mp3' }
-    ];
-
     const songButtons = songs.map(song => 
-        `<button class="bgm-option" data-src="${song.url}">${song.name}</button>`
+        `<button class="bgmp-option" data-src="${REPO_URL}/music/${song.filename}">${song.name}</button>`
     ).join('');
 
     container.innerHTML = `
-        <button id="bgm-trigger">♪</button>
-        <div id="bgm-panel">
-            <div class="bgm-header">Music Select</div>
-            <div class="bgm-list">${songButtons}</div>
-            <div class="bgm-footer">
-                <button id="bgm-stop-btn">BGM Stop</button>
+        <button id="bgmp-trigger" title="BGM再生">♪</button>
+        <div id="bgmp-panel">
+            <div class="bgmp-header">BGM Selection</div>
+            <div class="bgmp-list">${songButtons}</div>
+            <div class="bgmp-footer">
+                <button id="bgmp-stop-btn">Stop Music</button>
             </div>
         </div>
     `;
     document.body.appendChild(container);
 
-    // --- 3. ロジック ---
-    const trigger = document.getElementById('bgm-trigger');
-    const panel = document.getElementById('bgm-panel');
-    const options = document.querySelectorAll('.bgm-option');
-    const stopBtn = document.getElementById('bgm-stop-btn');
+    // --- 4. 制御ロジック ---
+    const trigger = document.getElementById('bgmp-trigger');
+    const panel = document.getElementById('bgmp-panel');
+    const options = document.querySelectorAll('.bgmp-option');
+    const stopBtn = document.getElementById('bgmp-stop-btn');
 
     let currentAudio = new Audio();
     currentAudio.loop = true;
 
-    // 開閉
+    // パネル開閉
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         const isVisible = panel.style.display === 'flex';
         panel.style.display = isVisible ? 'none' : 'flex';
         trigger.textContent = isVisible ? '♪' : '×';
+        trigger.style.backgroundColor = isVisible ? PRIMARY_COLOR : "#333";
     });
 
-    // 再生
+    // 曲の再生
     options.forEach(option => {
         option.addEventListener('click', (e) => {
             e.stopPropagation();
             const src = option.getAttribute('data-src');
-            if (currentAudio.src.includes(src) && !currentAudio.paused) return;
+            
+            // 再生中の曲を再度押した場合は一時停止/再開の切り替え
+            if (currentAudio.src === src) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                    option.classList.add('playing');
+                } else {
+                    currentAudio.pause();
+                    option.classList.remove('playing');
+                }
+                return;
+            }
 
             currentAudio.src = src;
-            currentAudio.play();
+            currentAudio.play().catch(err => console.error("再生に失敗しました:", err));
 
             options.forEach(opt => opt.classList.remove('playing'));
             option.classList.add('playing');
@@ -126,15 +140,16 @@
     stopBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         currentAudio.pause();
+        currentAudio.src = ""; // ソースをクリア
         options.forEach(opt => opt.classList.remove('playing'));
     });
 
-    // 枠外クリックで閉じる
+    // 画面外クリックで閉じる
     document.addEventListener('click', (e) => {
         if (!container.contains(e.target)) {
             panel.style.display = 'none';
             trigger.textContent = '♪';
+            trigger.style.backgroundColor = PRIMARY_COLOR;
         }
     });
-
 })();
