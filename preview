@@ -3,84 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Development in Progress</title>
+    <title>CheeseBroth Module Test</title>
     <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --accent-color: #6c5ce7;
-            --text-color: #2d3436;
-        }
-
+        /* デモ用のスタイル */
         body {
             margin: 0;
+            padding: 0;
+            background-color: #0d1117; /* GitHubダークモード風 */
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: var(--bg-color);
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            color: var(--text-color);
             overflow: hidden;
         }
-
-        .container {
+        .welcome-msg {
             text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            border: 1px solid #30363d;
+            padding: 40px;
+            border-radius: 12px;
+            background: #161b22;
         }
-
-        .container:hover {
-            transform: translateY(-5px);
-        }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-            animation: bounce 2s infinite;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin: 0.5rem 0;
-            letter-spacing: -0.5px;
-        }
-
-        p {
-            opacity: 0.7;
-            font-size: 1rem;
-        }
-
-        .badge {
-            display: inline-block;
-            background: var(--accent-color);
-            color: white;
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-20px);}
-            60% {transform: translateY(-10px);}
-        }
+        h1 { color: #469382; } /* あなたの象徴色を活用 */
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="badge">Under Construction</div>
-        <div class="icon">🚧</div>
-        <h1>開発中ページ</h1>
-        <p>現在、新しい体験を準備しています。<br>公開まで今しばらくお待ちください。</p>
+    <div class="welcome-msg">
+        <h1>CheeseBroth Modules</h1>
+        <p>左上の <b>☰ Menu</b> からサイドバーを展開できます。</p>
+        <p>右下の <b>♪</b> ボタンからBGMを選択できます。</p>
     </div>
+
+    <!-- 1. サイドバー・ツリー表示モジュールの読み込み -->
+    <script src="https://cdn.jsdelivr.net/gh/CheeseBroth-web/Modules/sidebar-tree.js"></script>
+
+    <!-- 2. BGMプレイヤー・モジュールの読み込み -->
+    <script src="https://cdn.jsdelivr.net/gh/CheeseBroth-web/Modules/bgm-player.js"></script>
 
 </body>
 </html>
